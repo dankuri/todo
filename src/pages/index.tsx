@@ -10,17 +10,21 @@ const Home: NextPage = () => {
     const [newTitle, setNewTitle] = useState('')
     const [newDescr, setNewDescr] = useState('')
 
-    // TODO: add zod validation for newTitle & newDescr
-
     const todos = api.todo.getAll.useQuery()
-    const trpc = api.useContext()
 
+    const trpc = api.useContext()
     const createTodoMutation = api.todo.createTodo.useMutation({
-        onSettled() {
-            trpc.todo.invalidate()
+        onSettled: async () => {
+            await trpc.todo.invalidate()
+        }
+    })
+    const deleteTodoMutation = api.todo.deleteTodo.useMutation({
+        onSettled: async () => {
+            await trpc.todo.invalidate()
         }
     })
 
+    // TODO: add zod validation for newTitle & newDescr
     const createTodo = () => {
         createTodoMutation.mutate({
             title: newTitle,
@@ -29,12 +33,6 @@ const Home: NextPage = () => {
         setNewTitle('')
         setNewDescr('')
     }
-
-    const deleteTodoMutation = api.todo.deleteTodo.useMutation({
-        onSettled() {
-            trpc.todo.invalidate()
-        }
-    })
 
     const deleteTodo = (id: string) => {
         deleteTodoMutation.mutate({
